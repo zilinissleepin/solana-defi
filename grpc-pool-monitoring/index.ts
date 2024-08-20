@@ -99,7 +99,10 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                     console.log("found", currentTimeMilliseconds);
 
                     const sig = txn.transaction.signatures[0]
-                    connection.getParsedTransaction(sig).then((tx) => {
+                    connection.getParsedTransaction(sig, {
+                        commitment: 'confirmed',
+                        maxSupportedTransactionVersion: 0
+                    }).then((tx) => {
                         console.log("tx time", tx.blockTime);
                         const tx_time = tx.blockTime!;
                         console.log("latency", currentTimeMilliseconds - tx_time);

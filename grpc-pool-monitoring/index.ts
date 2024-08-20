@@ -113,7 +113,7 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                         if(ltc == 0) {
                             ltc = (currentTimeMilliseconds - tx_time - 0.5);
                         }
-                        ltc = ltc * 0.99 + (currentTimeMilliseconds - tx_time - 0.5) / 100;
+                        ltc = ltc * 0.95 + (currentTimeMilliseconds - tx_time - 0.5) * 0.05;
 
                         //               bot.sendMessage(msgId, `
                         // New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n

@@ -42,6 +42,8 @@ const RAYDIUM_PUBLIC_KEY = RaydiumAmmParser.PROGRAM_ID;
 const url = "https://solemn-dawn-lake.solana-mainnet.quiknode.pro/aee5487e08ef0571ec4c6996e17894fef1f1f2a2/"
 const connection = new Connection(url, "confirmed");
 
+let ltc = 0;
+
 async function handleStream(client: Client, args: SubscribeRequest) {
     // Subscribe for events
     const stream = await client.subscribe();
@@ -106,7 +108,12 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                     }).then((tx) => {
                         console.log("tx time", tx.blockTime);
                         const tx_time = tx.blockTime!;
-                        console.log("latency", currentTimeMilliseconds - tx_time);
+                        console.log("latency", currentTimeMilliseconds - tx_time - 0.5);
+
+                        if(ltc == 0) {
+                            ltc = (currentTimeMilliseconds - tx_time - 0.5);
+                        }
+                        ltc = ltc * 0.99 + (currentTimeMilliseconds - tx_time - 0.5) / 100;
 
                         //               bot.sendMessage(msgId, `
                         // New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n

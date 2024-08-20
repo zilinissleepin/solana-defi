@@ -9,7 +9,7 @@ import Client, {
     SubscribeRequestFilterTransactions,
 } from "@triton-one/yellowstone-grpc";
 import {SubscribeRequestPing} from "@triton-one/yellowstone-grpc/dist/grpc/geyser";
-import {VersionedTransactionResponse, Connection} from "@solana/web3.js";
+import {Connection, VersionedTransactionResponse} from "@solana/web3.js";
 import {TransactionFormatter} from "./utils/transaction-formatter";
 import {RaydiumAmmParser} from "./utils/raydium-amm-parser";
 import * as dotenv from 'dotenv';
@@ -127,7 +127,7 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                         // Start Time | ${startTime}
                         // Owner/Dev | ${dev_wallet}
                         // `
-                        bot.sendMessage(msgId, `latency: ${currentTimeMilliseconds - tx_time}`
+                        bot.sendMessage(msgId, `latency: ${currentTimeMilliseconds - tx_time}, ltc: ${ltc}`
                         );
                         //   console.log(
                         //     `New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,

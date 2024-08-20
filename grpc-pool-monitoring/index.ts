@@ -127,7 +127,7 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                         // Start Time | ${startTime}
                         // Owner/Dev | ${dev_wallet}
                         // `
-                        bot.sendMessage(msgId, `latency: ${currentTimeMilliseconds - tx_time}, ltc: ${ltc}`
+                        bot.sendMessage(msgId, `latency: ${currentTimeMilliseconds - tx_time - 0.5}, ltc: ${ltc}`
                         );
                         //   console.log(
                         //     `New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,

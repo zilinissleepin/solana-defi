@@ -64,6 +64,11 @@ async function handleStream(client: Client, args: SubscribeRequest) {
     stream.on("data", (data) => {
         try {
             if (data?.transaction) {
+                const currentDate = new Date();
+                const currentTimeMilliseconds = currentDate.getTime() / 1000;
+
+                console.log("found", currentTimeMilliseconds);
+
                 const txn = TXN_FORMATTER.formTransactionFromJson(
                     data.transaction,
                     Date.now(),
@@ -92,11 +97,6 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                     const openTime = parseInfo.openTime
                     const startTime = new Date(openTime * 1000);
                     const initialBalance = parseInfo.initPcAmount;
-
-                    const currentDate = new Date();
-                    const currentTimeMilliseconds = currentDate.getTime() / 1000;
-
-                    console.log("found", currentTimeMilliseconds);
 
                     const sig = txn.transaction.signatures[0]
                     connection.getParsedTransaction(sig, {

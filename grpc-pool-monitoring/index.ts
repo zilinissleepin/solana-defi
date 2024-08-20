@@ -7,13 +7,16 @@ import Client, {
     SubscribeRequestFilterEntry,
     SubscribeRequestFilterSlots,
     SubscribeRequestFilterTransactions,
-  } from "@triton-one/yellowstone-grpc";
-  import { SubscribeRequestPing } from "@triton-one/yellowstone-grpc/dist/grpc/geyser";
-  import { VersionedTransactionResponse } from "@solana/web3.js";
-  import { TransactionFormatter } from "./utils/transaction-formatter";
-  import { RaydiumAmmParser } from "./utils/raydium-amm-parser";
-  
-  interface SubscribeRequest {
+} from "@triton-one/yellowstone-grpc";
+import {SubscribeRequestPing} from "@triton-one/yellowstone-grpc/dist/grpc/geyser";
+import {VersionedTransactionResponse, Connection} from "@solana/web3.js";
+import {TransactionFormatter} from "./utils/transaction-formatter";
+import {RaydiumAmmParser} from "./utils/raydium-amm-parser";
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+interface SubscribeRequest {
     accounts: { [key: string]: SubscribeRequestFilterAccounts };
     slots: { [key: string]: SubscribeRequestFilterSlots };
     transactions: { [key: string]: SubscribeRequestFilterTransactions };
@@ -24,69 +27,84 @@ import Client, {
     commitment?: CommitmentLevel | undefined;
     accountsDataSlice: SubscribeRequestAccountsDataSlice[];
     ping?: SubscribeRequestPing | undefined;
-  }
-  var TelegramBot = require("node-telegram-bot-api");
-  const TELEGRAM_BOT_TOKEN = "YOUR BOT KEY"
+}
 
-  const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling : true});
-  const msgId = 1122332232 //your bot msgID (in Numbers);
-  const TXN_FORMATTER = new TransactionFormatter();
-  const RAYDIUM_PARSER = new RaydiumAmmParser();
-  const RAYDIUM_PUBLIC_KEY = RaydiumAmmParser.PROGRAM_ID;
-  
-  async function handleStream(client: Client, args: SubscribeRequest) {
+var TelegramBot = require("node-telegram-bot-api");
+const TELEGRAM_BOT_TOKEN = "6124545364:AAFIKAOm-LVW0ZBN8uFXp4Ygs1-VKinwSfI"
+
+const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, {polling: true});
+const msgId = -4177682817 //your bot msgID (in Numbers);
+const TXN_FORMATTER = new TransactionFormatter();
+const RAYDIUM_PARSER = new RaydiumAmmParser();
+const RAYDIUM_PUBLIC_KEY = RaydiumAmmParser.PROGRAM_ID;
+
+const url = "https://solemn-dawn-lake.solana-mainnet.quiknode.pro/aee5487e08ef0571ec4c6996e17894fef1f1f2a2/"
+const connection = new Connection(url, "confirmed");
+
+async function handleStream(client: Client, args: SubscribeRequest) {
     // Subscribe for events
     const stream = await client.subscribe();
-  
+
     // Create `error` / `end` handler
     const streamClosed = new Promise<void>((resolve, reject) => {
-      stream.on("error", (error) => {
-        console.log("ERROR", error);
-        reject(error);
-        stream.end();
-      });
-      stream.on("end", () => {
-        resolve();
-      });
-      stream.on("close", () => {
-        resolve();
-      });
+        stream.on("error", (error) => {
+            console.log("ERROR", error);
+            reject(error);
+            stream.end();
+        });
+        stream.on("end", () => {
+            resolve();
+        });
+        stream.on("close", () => {
+            resolve();
+        });
     });
-  
+
     // Handle updates
     stream.on("data", (data) => {
-      try{
-      if (data?.transaction) {
-        const txn = TXN_FORMATTER.formTransactionFromJson(
-          data.transaction,
-          Date.now(),
-        );
-        const decodedRaydiumIxs = decodeRaydiumTxn(txn);
-       
-        if (!decodedRaydiumIxs?.length) return;
-        const createPoolIx = decodedRaydiumIxs.find((decodedRaydiumIx) => {
-          if (
-            decodedRaydiumIx.name === "raydiumInitialize" ||
-            decodedRaydiumIx.name === "raydiumInitialize2"
-          ) {
-            return decodedRaydiumIx;
-          }
-        });
-        if (createPoolIx) {
-          const info = JSON.stringify(createPoolIx.args);
-          const parseInfo = JSON.parse(info);
-          const solVault = parseInfo.pool_pc_token_account;
-          const tokenVault = parseInfo.pool_coin_token_account;
-          const solAddress = parseInfo.pc_mint_address;
-          const tokenAddress = parseInfo.coin_mint_address;
-          const lpMint = parseInfo.lp_mint_address;
-          const pool = parseInfo.pool_withdraw_queue;
-          const dev_wallet = parseInfo.user_wallet;
-          const openTime = parseInfo.openTime
-          const startTime = new Date(openTime * 1000); 
-          const initialBalance = parseInfo.initPcAmount;
-          console.log("found")
-          bot.sendMessage(msgId,`
+        try {
+            if (data?.transaction) {
+                const txn = TXN_FORMATTER.formTransactionFromJson(
+                    data.transaction,
+                    Date.now(),
+                );
+                const decodedRaydiumIxs = decodeRaydiumTxn(txn);
+
+                if (!decodedRaydiumIxs?.length) return;
+                const createPoolIx = decodedRaydiumIxs.find((decodedRaydiumIx) => {
+                    if (
+                        decodedRaydiumIx.name === "raydiumInitialize" ||
+                        decodedRaydiumIx.name === "raydiumInitialize2"
+                    ) {
+                        return decodedRaydiumIx;
+                    }
+                });
+                if (createPoolIx) {
+                    const info = JSON.stringify(createPoolIx.args);
+                    const parseInfo = JSON.parse(info);
+                    const solVault = parseInfo.pool_pc_token_account;
+                    const tokenVault = parseInfo.pool_coin_token_account;
+                    const solAddress = parseInfo.pc_mint_address;
+                    const tokenAddress = parseInfo.coin_mint_address;
+                    const lpMint = parseInfo.lp_mint_address;
+                    const pool = parseInfo.pool_withdraw_queue;
+                    const dev_wallet = parseInfo.user_wallet;
+                    const openTime = parseInfo.openTime
+                    const startTime = new Date(openTime * 1000);
+                    const initialBalance = parseInfo.initPcAmount;
+
+                    const currentDate = new Date();
+                    const currentTimeMilliseconds = currentDate.getTime() / 1000;
+
+                    console.log("found", currentTimeMilliseconds);
+
+                    const sig = txn.transaction.signatures[0]
+                    connection.getParsedTransaction(sig).then((tx) => {
+                        console.log("tx time", tx.blockTime);
+                        const tx_time = tx.blockTime!;
+                        console.log("latency", currentTimeMilliseconds - tx_time);
+
+                        bot.sendMessage(msgId, `
           New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n
           Token Address | ${tokenAddress}
           Sol Address | ${solAddress}
@@ -94,70 +112,73 @@ import Client, {
           Sol Vault | ${solVault}
           Lp mint | ${lpMint}
           Pool   | ${pool}
-          Initial Balance | ${initialBalance/1000000000} sol
+          Initial Balance | ${initialBalance / 1000000000} sol
           Start Time | ${startTime}
-          Owner/Dev | ${dev_wallet} 
+          Owner/Dev | ${dev_wallet}
           `
-        );
-        //   console.log(
-        //     `New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
-        //     JSON.stringify(createPoolIx.args, null, 2) + "\n",
-        //   );
+                        );
+                        //   console.log(
+                        //     `New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
+                        //     JSON.stringify(createPoolIx.args, null, 2) + "\n",
+                        //   );
+                    }).catch((err) => {
+                        console.log(err)
+                    });
+                }
+            }
+        } catch (error) {
+            if (error) {
+                console.log("Error")
+            }
         }
-      }
-  }catch(error){
-    if(error){
-      console.log("Error")
-    }
-  }
-});
-  
+    });
+
     // Send subscribe request
     await new Promise<void>((resolve, reject) => {
-      stream.write(args, (err: any) => {
-        if (err === null || err === undefined) {
-          resolve();
-        } else {
-          reject(err);
-        }
-      });
+        stream.write(args, (err: any) => {
+            if (err === null || err === undefined) {
+                resolve();
+            } else {
+                reject(err);
+            }
+        });
     }).catch((reason) => {
-      console.error(reason);
-      throw reason;
+        console.error(reason);
+        throw reason;
     });
-  
+
     await streamClosed;
-  }
-  
-  async function subscribeCommand(client: Client, args: SubscribeRequest) {
+}
+
+async function subscribeCommand(client: Client, args: SubscribeRequest) {
     while (true) {
-      try {
-        await handleStream(client, args);
-      } catch (error) {
-        console.error("Stream error, restarting in 1 second...", error);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+        try {
+            await handleStream(client, args);
+        } catch (error) {
+            console.error("Stream error, restarting in 1 second...", error);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
     }
-  }
-  
-  const client = new Client(
-    'YOUR Shyft GRPC URL ACCESS',
-    'YOUR X TOKEN',
+}
+
+const client = new Client(
+    process.env.URL!,
+    process.env.X_TOKEN!,
     undefined,
-  );
-  
-  const req: SubscribeRequest = {
+);
+
+const req: SubscribeRequest = {
     accounts: {},
     slots: {},
     transactions: {
-      raydiumLiquidityPoolV4: {
-        vote: false,
-        failed: false,
-        signature: undefined,
-        accountInclude: [RAYDIUM_PUBLIC_KEY.toBase58()],
-        accountExclude: [],
-        accountRequired: [],
-      },
+        raydiumLiquidityPoolV4: {
+            vote: false,
+            failed: false,
+            signature: undefined,
+            accountInclude: [RAYDIUM_PUBLIC_KEY.toBase58()],
+            accountExclude: [],
+            accountRequired: [],
+        },
     },
     transactionsStatus: {},
     entry: {},
@@ -166,23 +187,23 @@ import Client, {
     accountsDataSlice: [],
     ping: undefined,
     commitment: CommitmentLevel.CONFIRMED,
-  };
-  
-  subscribeCommand(client, req);
-  
-  function decodeRaydiumTxn(tx: VersionedTransactionResponse) {
+};
+
+subscribeCommand(client, req);
+
+function decodeRaydiumTxn(tx: VersionedTransactionResponse) {
     if (tx.meta?.err) return;
-  
+
     const allIxs = TXN_FORMATTER.flattenTransactionResponse(tx);
-  
+
     const raydiumIxs = allIxs.filter((ix) =>
-      ix.programId.equals(RAYDIUM_PUBLIC_KEY),
+        ix.programId.equals(RAYDIUM_PUBLIC_KEY),
     );
-  
+
     const decodedIxs = raydiumIxs.map((ix) =>
-      RAYDIUM_PARSER.parseInstruction(ix),
+        RAYDIUM_PARSER.parseInstruction(ix),
     );
-  
+
     return decodedIxs;
-  }
+}
   

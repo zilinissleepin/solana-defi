@@ -13,6 +13,7 @@ import {VersionedTransactionResponse, Connection} from "@solana/web3.js";
 import {TransactionFormatter} from "./utils/transaction-formatter";
 import {RaydiumAmmParser} from "./utils/raydium-amm-parser";
 import * as dotenv from 'dotenv';
+import * as process from "node:process";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ var TelegramBot = require("node-telegram-bot-api");
 const TELEGRAM_BOT_TOKEN = "6124545364:AAFIKAOm-LVW0ZBN8uFXp4Ygs1-VKinwSfI"
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, {polling: true});
-const msgId = -4177682817 //your bot msgID (in Numbers);
+const msgId = process.env.TG_ID ? process.env.TG_ID! : -4177682817 //your bot msgID (in Numbers);
 const TXN_FORMATTER = new TransactionFormatter();
 const RAYDIUM_PARSER = new RaydiumAmmParser();
 const RAYDIUM_PUBLIC_KEY = RaydiumAmmParser.PROGRAM_ID;

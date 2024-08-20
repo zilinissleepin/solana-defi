@@ -107,18 +107,19 @@ async function handleStream(client: Client, args: SubscribeRequest) {
                         const tx_time = tx.blockTime!;
                         console.log("latency", currentTimeMilliseconds - tx_time);
 
-                        bot.sendMessage(msgId, `
-          New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n
-          Token Address | ${tokenAddress}
-          Sol Address | ${solAddress}
-          Token Vault | ${tokenVault}
-          Sol Vault | ${solVault}
-          Lp mint | ${lpMint}
-          Pool   | ${pool}
-          Initial Balance | ${initialBalance / 1000000000} sol
-          Start Time | ${startTime}
-          Owner/Dev | ${dev_wallet}
-          `
+                        //               bot.sendMessage(msgId, `
+                        // New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n
+                        // Token Address | ${tokenAddress}
+                        // Sol Address | ${solAddress}
+                        // Token Vault | ${tokenVault}
+                        // Sol Vault | ${solVault}
+                        // Lp mint | ${lpMint}
+                        // Pool   | ${pool}
+                        // Initial Balance | ${initialBalance / 1000000000} sol
+                        // Start Time | ${startTime}
+                        // Owner/Dev | ${dev_wallet}
+                        // `
+                        bot.sendMessage(msgId, `latency: ${currentTimeMilliseconds - tx_time}`
                         );
                         //   console.log(
                         //     `New LP Found https://translator.shyft.to/tx/${txn.transaction.signatures[0]} \n`,
